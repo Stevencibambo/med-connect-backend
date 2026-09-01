@@ -29,12 +29,12 @@ router.get('/patients/search', authenticateToken, requireRole([UserRole.ADMIN, U
 router.get('/patients/:patientId', authenticateToken, requireRole([UserRole.ADMIN, UserRole.DOCTOR]), validateParams(patientIdParamSchema), PatientController.getPatientById);
 router.put('/patients/:patientId', authenticateToken, requireRole([UserRole.ADMIN, UserRole.DOCTOR]), validateParams(patientIdParamSchema), validateBody(patientUpdateSchema), PatientController.updatePatient);
 router.get('/patients/:patientId/history', authenticateToken, requireRole([UserRole.DOCTOR, UserRole.ADMIN, UserRole.PATIENT]), validateParams(patientIdParamSchema), validateQuery(medicalHistoryPaginationSchema), PatientController.getPatientMedicalHistory);
-
+router.get('/patients/:patientId/profile', authenticateToken, requireRole([UserRole.PATIENT, UserRole.DOCTOR]), validateParams(patientIdParamSchema), PatientController.getPatientByUserId);
 // Doctor and Admin only routes
 router.post('/patients/:patientId/visits', authenticateToken, requireRole([UserRole.DOCTOR, UserRole.ADMIN]), validateParams(patientIdParamSchema), validateBody(medicalVisitSchema), PatientController.createMedicalVisit);
 router.get('/patients/:patientId/visits', authenticateToken, requireRole([UserRole.DOCTOR, UserRole.ADMIN]), validateParams(patientIdParamSchema), validateQuery(advancedPaginationSchema), PatientController.getPatientMedicalVisits);
 router.post('/patients/:patientId/prescriptions', authenticateToken, requireRole([UserRole.DOCTOR, UserRole.ADMIN]), validateParams(patientIdParamSchema), validateBody(prescriptionSchema), PatientController.createPrescription);
-router.get('/patients/:patientId/prescriptions', authenticateToken, requireRole([UserRole.DOCTOR, UserRole.ADMIN]), validateParams(patientIdParamSchema), validateQuery(advancedPaginationSchema), PatientController.getPatientPrescriptions);
+router.get('/patients/:patientId/prescriptions', authenticateToken, requireRole([UserRole.DOCTOR, UserRole.ADMIN, UserRole.PATIENT]), validateParams(patientIdParamSchema), validateQuery(advancedPaginationSchema), PatientController.getPatientPrescriptions);
 router.get('/patients', authenticateToken, requireDoctor, validateQuery(paginationSchema), PatientController.getAllPatients);
 
 // Prescription management routes

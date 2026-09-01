@@ -190,7 +190,7 @@ static async getAllPatients (limit: number = 10, offset: number = 0): Promise<{ 
         },
       ],
     });
-
+    console.log("Not osiojsisj soijsoijsoisj sisjoisjso=====================", patient)
     if (!patient) {
       return null;
     }
@@ -521,6 +521,10 @@ static async getAllPatients (limit: number = 10, offset: number = 0): Promise<{ 
             as: 'user',
             attributes: ['fullName', 'email']
           }]
+        },
+        {
+          model: QRCode,
+          as: 'qrCode',
         },
         {
           model: PrescriptionItem,

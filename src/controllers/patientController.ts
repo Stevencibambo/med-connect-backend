@@ -2,7 +2,7 @@ import { Request, Response } from 'express';
 import { PatientService } from '../services/patientService';
 import { PrescriptionService } from '../services/prescriptionService';
 import { authenticateToken, requireRole } from '../middleware/auth';
-import { UserRole } from '../models';
+import { Patient, User, UserRole } from '../models';
 import { PatientRegistrationData, MedicalVisitData, PrescriptionData } from '../types';
 import { validateBody, validateQuery, validateParams } from '../middleware/validation';
 import { 
@@ -162,7 +162,44 @@ static async getAllPatients (req: Request, res: Response) {
       });
     }
   }
+  static async getPatientByUserId(req: Request, res: Response) {
+    try {
+      const { patientId } = req.params
+      if(!patientId){
+        return res.status(400).json({
+          success: false,
+          error: {
+            message: "User ID is required",
+            statusCode: 400
+          },
+        });
+      }
+      
+      const patient = await PatientService.getPatientByUserId(patientId);
 
+      if(!patient) {
+        return res.status(404).json({
+          success: false,
+          error: {
+            message: 'User not found',
+            statusCode: 404
+          },
+        });
+      }
+      res.status(200).json({
+        success: true,
+        data: patient,
+      });
+    } catch (error: any) {
+      res.status(500).json({
+        success: false,
+        error: {
+          message: error.message,
+          statusCode: 500
+        },
+      });
+    }
+  }
   // Get patient by ID
   static async getPatientById (req: Request, res: Response) {
     try {
@@ -365,8 +402,12 @@ static async getAllPatients (req: Request, res: Response) {
       const pageNum = parseInt(page as string);
       const limitNum = parseInt(limit as string);
 
+      const user_tmp = await User.findByPk(patientId);
+      const patient = await Patient.findOne({ where: {userId: user_tmp?.id}})
+      const userId = patient?.id || ""
+
       const history = await PatientService.getPatientMedicalHistory(
-        patientId, 
+        userId, 
         pageNum, 
         limitNum, 
         type as 'visits' | 'prescriptions' | 'all',
@@ -461,8 +502,13 @@ static async getAllPatients (req: Request, res: Response) {
           },
         });
       }
+      const user = await User.findByPk(patientId);
+      const patient = await Patient.findOne({ where: {userId: user?.id}})
+      const userId = patient?.id || ""
 
-      const result = await PatientService.getPatientPrescriptions(patientId, pageNum, limitNum, sortBy as string, sortOrder as 'ASC' | 'DESC');
+      const result = await PatientService.getPatientPrescriptions(userId, pageNum, limitNum, sortBy as string, sortOrder as 'ASC' | 'DESC');
+
+      
 
       res.status(200).json({
         success: true,
